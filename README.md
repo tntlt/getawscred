@@ -11,10 +11,8 @@ positional arguments:
 
 optional arguments:
   -h, --help           show this help message and exit
-  -f CREDENTIALS FILE  Credential's file with path, default is
-                       ~/.aws/credentials
-  -p PROFILE           Name of aws profile in credential's file, default is
-                       the awsaccount name
+  -f CREDENTIALS FILE  Credential's file with path, default is ~/.aws/credentials
+  -p PROFILE           Name of aws profile in credential's file, default is the awsaccount name
   -r                   Recreate cookie file
   -s                   Show credentials instead of writing to file
 </pre></div>
