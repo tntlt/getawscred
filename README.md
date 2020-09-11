@@ -1,18 +1,16 @@
 # GETAWSCRED v1.0, get CLI credentials from AWS SSO login page
 Automatic 
 
-  usage: getawscred.py [-h] [-f CREDENTIALS FILE] [-p PROFILE] [-r] [-s]
+usage: getawscred.py [-h] [-f CREDENTIALS FILE] [-p PROFILE] [-r] [-s]
                      SSOSITE SSOUSERNAME AWSACCOUNT AWSUSERNAME
 
-GETAWSCRED v1.0, get CLI credentials from AWS SSO login page
+GETAWSCRED v1.0, get CLI credentials from AWS SSO login pag
 
 positional arguments:
   SSOSITE              SSO site, i.e. "company-aws-sso.awsapps.com"
   SSOUSERNAME          SSO username
-  AWSACCOUNT           AWS account, can be part of name if it is unique, i.e.
-                       "Company Infra"
-  AWSUSERNAME          AWS username, can be part of name if it is unique, i.e.
-                       "power"
+  AWSACCOUNT           AWS account, can be part of name if it is unique, i.e. "Company Infra"
+  AWSUSERNAME          AWS username, can be part of name if it is unique, i.e. "power"
 
 optional arguments:
   -h, --help           show this help message and exit
