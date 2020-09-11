@@ -16,5 +16,5 @@ optional arguments:
 </pre></div>
 
 The python script uses Selenium as headless browser in order to mimic SSO authentication against aws site. 
-It is able to detect MFA code requirement and prompts for entering it. It creates a cookie file for preserving MFA authentication.
+It is able to detect requirement of MFA code and prompts for entering it. The cookie file allows preserve the MFA authentication.
 
