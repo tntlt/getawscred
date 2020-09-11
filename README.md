@@ -2,14 +2,11 @@
 
 <div class="highlight highlight-source-shell"><pre>
 usage: getawscred.py [-h] [-f CREDENTIALS FILE] [-p PROFILE] [-r] [-s] SSOSITE SSOUSERNAME AWSACCOUNT AWSUSERNAME
-
-
 positional arguments:
   SSOSITE              SSO site, i.e. "company-aws-sso.awsapps.com"
   SSOUSERNAME          SSO username
   AWSACCOUNT           AWS account, can be part of name if it is unique, i.e. "Company Infra"
   AWSUSERNAME          AWS username, can be part of name if it is unique, i.e. "power"
-
 optional arguments:
   -h, --help           show this help message and exit
   -f CREDENTIALS FILE  Credential's file with path, default is ~/.aws/credentials
