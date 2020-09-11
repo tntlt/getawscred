@@ -14,3 +14,7 @@ optional arguments:
   -r                   Recreate cookie file
   -s                   Show credentials instead of writing to file
 </pre></div>
+
+The python script uses Selenium as headless browser in order to mimic SSO authentication against aws site. 
+It is able to detect MFA code requirement and prompts for entering it. It creates a cookie file for preserving MFA authentication.
+
