@@ -1,3 +1,5 @@
+#v1.5
+
 import sys, getpass, time, pickle, pathlib, signal, argparse
 from pathlib import Path
 from selenium import webdriver
@@ -98,7 +100,7 @@ def run_program():
 
 	args = parser.parse_args()
 
-	awsweb = SelWeb('https://'+args.ssosite+'/start#/', '//*[@id="LoginForm"]')
+	awsweb = SelWeb('https://'+args.ssosite+'/start#/', '//*[@id="main-container"]')
 	cookdir = str(Path.home())+"/.getawscred"
 	if not Path(cookdir).exists():
 		Path(cookdir).mkdir()
@@ -110,84 +112,90 @@ def run_program():
 	else:
 		pickle.dump(awsweb.driver.get_cookies(), open(cookfile, "wb"))
 
-	while True:
-		if awsweb.driver.title.endswith("AWS Apps Authentication"):
-			if awsweb.FindEl('//h4[contains(text(),"Authentication Failed")]') is not None:
-				print("Authentication Failed (please check your username and password)")
-			form = awsweb.FindEl('/html[1]/body[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]')
-			if sys.getsizeof(form, 0) == 0:
-				awsweb.tearDown()
-				print('Try again later..')
-				sys.exit()
-			idd = form.get_property('id')
-			if idd == 'LoginForm':
-				username = awsweb.FindEl("//input[@id='wdc_username']")
-				password = awsweb.FindEl("//input[@id='wdc_password']")
-				if args.username is None:
-					usern = input("Enter username:")
-				else:
-					usern = args.username
-				passw = getpass.getpass("Enter password:")
-				username.clear()
-				password.clear()
-				username.send_keys(usern)
-				password.send_keys(passw)
-				awsweb.FindEl("//button[@id='wdc_login_button']").click()
-				time.sleep(2)
-			elif idd == 'mfa_form':
-				mfa_check = awsweb.FindEl("//input[@type='checkbox']")
-				if not mfa_check.is_selected():
-					mfa_check.click()
-				mfaco = input("Enter MFA code:")
-				mfacode = awsweb.FindEl("//input[@id='wdc_mfacode']")
-				mfacode.clear()
-				mfacode.send_keys(mfaco)
-				awsweb.FindEl("//button[@class='a-button-text']").click()
-				time.sleep(2)
-		elif awsweb.driver.title == "Your applications":
-			element1 = awsweb.FindEl("//portal-application[starts-with(@id,'app-')]")
-			hoverover = ActionChains(awsweb.driver).move_to_element(element1).click().perform()
-			time.sleep(2)
-			if awsweb.FindAccUserClick("//portal-instance","//portal-instance",args.awsaccount,"There is no such AWS account - "+args.awsaccount) is not True:
-				break
-			time.sleep(2)
-			if awsweb.FindAccUserClick("//portal-profile","//a[@id='temp-credentials-button']",args.awsusername,"There is no such aws user - "+args.awsusername) is not True:
-				break
-			time.sleep(2)
-			k12key = awsweb.FindEl("//div[@id='cli-cred-file-code']")
-			k12keylist = k12key.text.split("\n")
-			if args.awsprofile:
-				k12keylist[0] = '['+args.awsprofile+']'
+	baduser = False
+	while awsweb.driver.title == "Amazon Web Services (AWS) Sign-In":
+		if baduser:
+			print("The username '"+usern+"' doesnt exist")
+		username = awsweb.FindEl("//input[@id='awsui-input-0']")
+		username.clear
+		if (args.username is None) or baduser:
+			usern = input("Enter username:")
+		else:
+			usern = args.username
+		username.send_keys(usern)
+		awsweb.FindEl("//awsui-button[@id='username-submit-button']").click()
+		time.sleep(2)
+		baduser = True
 
-			if not args.shcred:
-				flag=1
-				if args.credfile:
-					credfile=args.credfile
-				else:
-					credfile=str(Path.home())+"/.aws/credentials"
-				try:
-					with open(credfile, 'r+') as iofile:
-						lines = iofile.readlines()
-						for index, line in enumerate(lines):
-							line=line.strip("\n")
-							if line.startswith(k12keylist[0]):
-								flag = 0
-							if line.startswith("[") and not line.startswith(k12keylist[0]):
-								flag = 1
-							if flag:
-								k12keylist.append(line.strip('\n'))
-						iofile.seek(0)
-						iofile.truncate()
-						for line in k12keylist:
-							iofile.write(line+'\n')
-						print("Credentials file - "+credfile+" has been updated.")
-				except FileNotFoundError:
-					print("Error: No such file - " + credfile)
-			else:
-				for i in k12keylist:
-					print(i)
+	while awsweb.driver.title.endswith("AWS Apps Authentication"):
+		form = awsweb.FindEl('/html[1]/body[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]')
+		if sys.getsizeof(form, 0) == 0:
+			awsweb.tearDown()
+			print('Try again later..')
+			sys.exit()
+		idd = form.get_property('id')
+		if idd == 'LoginForm':
+			password = awsweb.FindEl("//input[@id='wdc_password']")
+			passw = getpass.getpass("Enter password:")
+			password.clear()
+			password.send_keys(passw)
+			awsweb.FindEl("//button[@id='wdc_login_button']").click()
+			time.sleep(3)
+		elif idd == 'mfa_form':
+			mfa_check = awsweb.FindEl("//input[@type='checkbox']")
+			if not mfa_check.is_selected():
+				mfa_check.click()
+			mfaco = input("Enter MFA code:")
+			mfacode = awsweb.FindEl("//input[@id='wdc_mfacode']")
+			mfacode.clear()
+			mfacode.send_keys(mfaco)
+			awsweb.FindEl("//button[@class='a-button-text']").click()
+			time.sleep(2)
+
+	while awsweb.driver.title == "Your applications":
+		element1 = awsweb.FindEl("//portal-application[starts-with(@id,'app-')]")
+		hoverover = ActionChains(awsweb.driver).move_to_element(element1).click().perform()
+		time.sleep(2)
+		if awsweb.FindAccUserClick("//portal-instance","//portal-instance",args.awsaccount,"There is no such AWS account - "+args.awsaccount) is not True:
 			break
+		time.sleep(2)
+		if awsweb.FindAccUserClick("//portal-profile","//a[@id='temp-credentials-button']",args.awsusername,"There is no such aws user - "+args.awsusername) is not True:
+			break
+		time.sleep(2)
+		k12key = awsweb.FindEl("//div[@id='cli-cred-file-code']")
+		k12keylist = k12key.text.split("\n")
+		if args.awsprofile:
+			k12keylist[0] = '['+args.awsprofile+']'
+		k12keylist.remove('Click to copy this text')
 
+		if not args.shcred:
+			flag=1
+			if args.credfile:
+				credfile=args.credfile
+			else:
+				credfile=str(Path.home())+"/.aws/credentials"
+			try:
+				with open(credfile, 'r+') as iofile:
+					lines = iofile.readlines()
+					for index, line in enumerate(lines):
+						line=line.strip("\n")
+						if line.startswith(k12keylist[0]):
+							flag = 0
+						if line.startswith("[") and not line.startswith(k12keylist[0]):
+							flag = 1
+						if flag:
+							k12keylist.append(line.strip('\n'))
+					iofile.seek(0)
+					iofile.truncate()
+					for line in k12keylist:
+						iofile.write(line+'\n')
+					print("Credentials file - "+credfile+" has been updated.")
+			except FileNotFoundError:
+				print("Error: No such file - " + credfile)
+		else:
+			for i in k12keylist:
+				print(i)
+		break
 
 	awsweb.tearDown()
 
