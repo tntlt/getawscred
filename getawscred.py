@@ -1,4 +1,4 @@
-#v1.5.1
+#v1.5.2
 
 import sys, getpass, time, pickle, pathlib, signal, argparse
 from pathlib import Path
