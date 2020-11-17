@@ -157,8 +157,8 @@ def run_program():
 		k12keylist = k12key.text.split("\n")
 		if args.awsprofile:
 			k12keylist[0] = '['+args.awsprofile+']'
-		k12keylist.remove('Click to copy this text')
-
+		if 'Click to copy this text' in k12keylist:
+			k12keylist.remove('Click to copy this text')
 		if not args.shcred:
 			flag=1
 			if args.credfile:
