@@ -1,4 +1,4 @@
-#v1.5
+#v1.5.1
 
 import sys, getpass, time, pickle, pathlib, signal, argparse
 from pathlib import Path
@@ -114,7 +114,6 @@ def run_program():
 		else:
 			usern = args.username
 		username.send_keys(usern)
-#		username.setAttribute("text", usern)
 		awsweb.FindEl("//awsui-button[@id='username-submit-button']").click()
 		time.sleep(2)
 		baduser = True
