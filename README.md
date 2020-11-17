@@ -1,4 +1,4 @@
-# GETAWSCRED v1.5.1, get CLI credentials from AWS SSO login page
+# GETAWSCRED v1.5.2, get CLI credentials from AWS SSO login page
 
 <div class="highlight highlight-source-shell"><pre>
 usage: getawscred.py [-h] [-f CREDENTIALS FILE] [-p PROFILE] [-r] [-s] SSOSITE SSOUSERNAME AWSACCOUNT AWSUSERNAME
