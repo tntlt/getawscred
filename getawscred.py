@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException
 #from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-#from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException  
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
@@ -19,6 +19,7 @@ class SelWeb:
 		options.binary_location = '/usr/bin/google-chrome'
 		options.add_argument('headless')
 		options.add_argument('--no-sandbox')
+		options.add_argument("user-data-dir="+str(Path.home())+"/.getawscred")
 		prefs = {"profile.managed_default_content_settings.images": 2}
 		options.add_experimental_option("prefs", prefs)
 		self.driver = webdriver.Chrome(chrome_options=options)
@@ -101,28 +102,19 @@ def run_program():
 	args = parser.parse_args()
 
 	awsweb = SelWeb('https://'+args.ssosite+'/start#/', '//*[@id="main-container"]')
-	cookdir = str(Path.home())+"/.getawscred"
-	if not Path(cookdir).exists():
-		Path(cookdir).mkdir()
-	cookfile=cookdir+"/cookies.pkl"
-	if pathlib.Path(cookfile).exists() and not args.delcook:
-		cookies = pickle.load(open(cookfile, "rb"))
-		for cookie in cookies:
-			awsweb.driver.add_cookie(cookie)
-	else:
-		pickle.dump(awsweb.driver.get_cookies(), open(cookfile, "wb"))
 
 	baduser = False
 	while awsweb.driver.title == "Amazon Web Services (AWS) Sign-In":
 		if baduser:
 			print("The username '"+usern+"' doesnt exist")
 		username = awsweb.FindEl("//input[@id='awsui-input-0']")
-		username.clear
+		username.clear()
 		if (args.username is None) or baduser:
 			usern = input("Enter username:")
 		else:
 			usern = args.username
 		username.send_keys(usern)
+#		username.setAttribute("text", usern)
 		awsweb.FindEl("//awsui-button[@id='username-submit-button']").click()
 		time.sleep(2)
 		baduser = True
