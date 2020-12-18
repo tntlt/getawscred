@@ -1,4 +1,4 @@
-#v1.5.2
+#v2.0
 
 import sys, getpass, time, pickle, pathlib, signal, argparse
 from pathlib import Path
@@ -89,7 +89,7 @@ class element_has_css_class(object):
         return False
 
 def run_program():
-	parser = argparse.ArgumentParser(description='GETAWSCRED v1.0, get CLI credentials from AWS SSO login page')
+	parser = argparse.ArgumentParser(description='GETAWSCRED v2.0, get CLI credentials from AWS SSO login page')
 	parser.add_argument('ssosite', metavar='SSOSITE', type=str,	help='SSO site, i.e. "company-aws-sso.awsapps.com"')
 	parser.add_argument('username', metavar='SSOUSERNAME', type=str, help='SSO username')
 	parser.add_argument('awsaccount', metavar='AWSACCOUNT', type=str, help='AWS account, can be part of name if it is unique, i.e. "Company Infra"')
