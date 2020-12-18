@@ -12,7 +12,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException  
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
-
+#
 class SelWeb:
 	def __init__(self, url, checkel='none'):
 		options = webdriver.ChromeOptions()
@@ -22,7 +22,7 @@ class SelWeb:
 		options.add_argument("user-data-dir="+str(Path.home())+"/.getawscred")
 		prefs = {"profile.managed_default_content_settings.images": 2}
 		options.add_experimental_option("prefs", prefs)
-		self.driver = webdriver.Chrome(chrome_options=options)
+		self.driver = webdriver.Chrome(options=options)
 		self.driver.implicitly_wait(5)
 		self.driver.get(url)
 		if checkel != 'none':
@@ -52,17 +52,17 @@ class SelWeb:
 		return(x1)
 
 	def FindAccUserClick(self, element1, click1, lookfor, msg1):
-		k12awsacc = self.FindEls(element1)
+		_awsacc = self.FindEls(element1)
 		if element1 is not click1:
-			k12awscli = self.FindEls(click1)
+			_awscli = self.FindEls(click1)
 		else:
-			k12awscli = k12awsacc
+			_awscli = _awsacc
 		i = []
-		for y in k12awsacc:
+		for y in _awsacc:
 			i.append(y.text.split("\n")[0])
 		for ii in i:
 			if lookfor in ii:
-				k12awscli[i.index(ii)].click()
+				_awscli[i.index(ii)].click()
 				return True
 		print(msg1)
 		return False
@@ -105,43 +105,21 @@ def run_program():
 
 	baduser = False
 	while awsweb.driver.title == "Amazon Web Services (AWS) Sign-In":
-		if baduser:
-			print("The username '"+usern+"' doesnt exist")
-		username = awsweb.FindEl("//input[@id='awsui-input-0']")
-		username.clear()
-		if (args.username is None) or baduser:
-			usern = input("Enter username:")
-		else:
-			usern = args.username
-		username.send_keys(usern)
-		awsweb.FindEl("//awsui-button[@id='username-submit-button']").click()
-		time.sleep(2)
-		baduser = True
+		record = awsweb.FindEl("//input[contains(@id,'input')]")
+		record.clear()
+		if awsweb.FindEl("//*[text()='Username']"):
+			if (args.username is None) or baduser:
+				record_input = input("Enter username:")
+			else:
+				record_input = args.username
+		elif awsweb.FindEl("//*[text()='Password']"):
+			record_input = getpass.getpass("Enter password:")
+		elif awsweb.FindEl("//*[text()='MFA code']"):
+			record_input = input("Enter MFA code:")
 
-	while awsweb.driver.title.endswith("AWS Apps Authentication"):
-		form = awsweb.FindEl('/html[1]/body[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]')
-		if sys.getsizeof(form, 0) == 0:
-			awsweb.tearDown()
-			print('Try again later..')
-			sys.exit()
-		idd = form.get_property('id')
-		if idd == 'LoginForm':
-			password = awsweb.FindEl("//input[@id='wdc_password']")
-			passw = getpass.getpass("Enter password:")
-			password.clear()
-			password.send_keys(passw)
-			awsweb.FindEl("//button[@id='wdc_login_button']").click()
-			time.sleep(3)
-		elif idd == 'mfa_form':
-			mfa_check = awsweb.FindEl("//input[@type='checkbox']")
-			if not mfa_check.is_selected():
-				mfa_check.click()
-			mfaco = input("Enter MFA code:")
-			mfacode = awsweb.FindEl("//input[@id='wdc_mfacode']")
-			mfacode.clear()
-			mfacode.send_keys(mfaco)
-			awsweb.FindEl("//button[@class='a-button-text']").click()
-			time.sleep(2)
+		record.send_keys(record_input)
+		awsweb.FindEl("//button[@type='submit']").click()
+		time.sleep(2)
 
 	while awsweb.driver.title == "Your applications":
 		element1 = awsweb.FindEl("//portal-application[starts-with(@id,'app-')]")
