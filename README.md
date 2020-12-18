@@ -17,3 +17,15 @@ optional arguments:
 
 The python script uses Selenium as headless browser in order to mimic SSO authentication against aws site.<br>
 It is able to detect a requirement of MFA code and prompts for entering it. The cookie file allows to preserve the MFA authentication.<br>
+
+Samle of runing for company:cnn, user:john, awsaccount:Infra, administrator-credentials:"Admin, name-of-profile-in-.aws/credentials.file: default :
+
+$ python3 getawscred.py cnn-aws-sso.awsapps.com john "Infra" "Admin" -p default
+
+If program throws an error you have to clean chrome process with:
+
+$ pkill -9 chrome
+
+If program throws a message "Loading took too much time!" then delete the chrome cache folder:
+
+$ rm -r ~/.getawscred
