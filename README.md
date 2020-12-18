@@ -20,12 +20,18 @@ It is able to detect a requirement of MFA code and prompts for entering it. The 
 
 Samle of runing for company:cnn, user:john, awsaccount:Infra, administrator-credentials:"Admin, name-of-profile-in-.aws/credentials.file: default :
 
+<div class="highlight highlight-source-shell"><pre>
 $ python3 getawscred.py cnn-aws-sso.awsapps.com john "Infra" "Admin" -p default
+</pre></div>
 
 If program throws an error you have to clean chrome process with:
 
+<div class="highlight highlight-source-shell"><pre>
 $ pkill -9 chrome
+</pre></div>
 
 If program throws a message "Loading took too much time!" then delete the chrome cache folder:
 
+<div class="highlight highlight-source-shell"><pre>
 $ rm -r ~/.getawscred
+</pre></div>
