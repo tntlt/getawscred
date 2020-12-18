@@ -1,7 +1,7 @@
 # GETAWSCRED - get CLI credentials from AWS SSO login page
 
 The python script uses Selenium as headless browser in order to mimic SSO authentication against aws site.<br>
-It is able to detect a requirement of MFA code and prompts for entering it. The cookie file allows to preserve the MFA authentication.<br>
+It is able to detect a requirement of MFA code and prompts for entering it.<br>
 
 <div class="highlight highlight-source-shell"><pre>
 usage: getawscred.py [-h] [-f CREDENTIALS FILE] [-p PROFILE] [-r] [-s] SSOSITE SSOUSERNAME AWSACCOUNT AWSUSERNAME
