@@ -24,6 +24,16 @@ Sample of runing for company:cnn, user:john, awsaccount:Infra, administrator-cre
 $ python3 getawscred.py cnn-aws-sso.awsapps.com john "Infra" "Admin" -p default
 </pre></div>
 
+Installing Selenium and Chrome with Chromedriver:
+
+<div class="highlight highlight-source-shell"><pre>
+$ pip3 install selenium
+
+$ sudo apt install gdebi-core wget
+$ wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+$ sudo gdebi google-chrome-stable_current_amd64.deb
+</pre></div>
+
 If program throws an error you have to clean chrome process with:
 
 <div class="highlight highlight-source-shell"><pre>
