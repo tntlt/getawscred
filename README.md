@@ -28,7 +28,6 @@ Installing Selenium and Chrome with Chromedriver:
 
 <div class="highlight highlight-source-shell"><pre>
 $ pip3 install selenium
-
 $ sudo apt install gdebi-core wget
 $ wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 $ sudo gdebi google-chrome-stable_current_amd64.deb
