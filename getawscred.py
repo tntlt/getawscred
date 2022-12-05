@@ -1,4 +1,4 @@
-#v2.0
+#v2.0.4
 
 import sys, getpass, time, pickle, pathlib, signal, argparse
 from pathlib import Path
@@ -9,21 +9,25 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException
 #from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoSuchElementException  
+from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support import expected_conditions as EC
+from re import search
 #
 class SelWeb:
 	def __init__(self, url, checkel='none'):
 		options = webdriver.ChromeOptions()
 		options.binary_location = '/usr/bin/google-chrome'
-		options.add_argument('headless')
 		options.add_argument('--no-sandbox')
+		options.add_argument('--headless')
+		options.add_argument('--disable-gpu')
+		options.add_argument("--window-size=1280,720")
 		options.add_argument("user-data-dir="+str(Path.home())+"/.getawscred")
 		prefs = {"profile.managed_default_content_settings.images": 2}
 		options.add_experimental_option("prefs", prefs)
 		self.driver = webdriver.Chrome(options=options)
-		self.driver.implicitly_wait(5)
+#		self.driver.implicitly_wait(5)
 		self.driver.get(url)
 		if checkel != 'none':
 			while True:
@@ -36,20 +40,27 @@ class SelWeb:
 				except StaleElementReferenceException:
 					continue
 				break
-			
+
 	def FindEl(self, element):
 		try:
-			x1=self.driver.find_element_by_xpath(element)
+			x1=self.driver.find_element(By.XPATH, element)
 		except NoSuchElementException:
 			x1=None
 		return(x1)
-		
+
 	def FindEls(self, element):
 		try:
-			x1=self.driver.find_elements_by_xpath(element)
+			x1=self.driver.find_elements(By.XPATH,element)
 		except NoSuchElementException:
 			x1=object()
 		return(x1)
+
+	def WaitElClick(self, element):
+		WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable((By.XPATH, element))).click()
+
+	def WaitEl(self, element):
+		WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable((By.XPATH, element)))
+
 
 	def FindAccUserClick(self, element1, click1, lookfor, msg1):
 		_awsacc = self.FindEls(element1)
@@ -70,26 +81,21 @@ class SelWeb:
 	def tearDown(self):
 		self.driver.close()
 		self.driver.quit()
-		
+
 class element_has_css_class(object):
-  """"An expectation for checking that an element has a particular css class.
+	def __init__(self, locator, css_class):
+		self.locator = locator
+		self.css_class = css_class
 
-  locator - used to find the element
-  returns the WebElement once it has the particular css class
-  """
-  def __init__(self, locator, css_class):
-    self.locator = locator
-    self.css_class = css_class
-
-  def __call__(self, driver):
-    element = driver.find_element(*self.locator)   # Finding the referenced element
-    if self.css_class in element.get_attribute("class"):
-        return element
-    else:
-        return False
+	def __call__(self, driver):
+		element = driver.find_element(*self.locator)   # Finding the referenced element
+		if self.css_class in element.get_attribute("class"):
+			return element
+		else:
+			return False
 
 def run_program():
-	parser = argparse.ArgumentParser(description='GETAWSCRED v2.0, get CLI credentials from AWS SSO login page')
+	parser = argparse.ArgumentParser(description='GETAWSCRED v2.0.4, get CLI credentials from AWS SSO login page')
 	parser.add_argument('ssosite', metavar='SSOSITE', type=str,	help='SSO site, i.e. "company-aws-sso.awsapps.com"')
 	parser.add_argument('username', metavar='SSOUSERNAME', type=str, help='SSO username')
 	parser.add_argument('awsaccount', metavar='AWSACCOUNT', type=str, help='AWS account, can be part of name if it is unique, i.e. "Company Infra"')
@@ -100,11 +106,12 @@ def run_program():
 	parser.add_argument('-s', help="Show credentials instead of writing to file", dest="shcred", action='store_true')
 
 	args = parser.parse_args()
-
-	awsweb = SelWeb('https://'+args.ssosite+'/start#/', '//*[@id="main-container"]')
+	awsweb = SelWeb('https://'+args.ssosite+'/start#/', '//*[contains(@class, "awsui-button")]')
 
 	baduser = False
-	while awsweb.driver.title == "Amazon Web Services (AWS) Sign-In":
+
+	while search("Sign in to|Additional verification required", awsweb.driver.page_source):
+		passed_mfa= False
 		record = awsweb.FindEl("//input[contains(@id,'input')]")
 		record.clear()
 		if awsweb.FindEl("//*[text()='Username']"):
@@ -116,15 +123,16 @@ def run_program():
 			record_input = getpass.getpass("Enter password:")
 		elif awsweb.FindEl("//*[text()='MFA code']"):
 			record_input = input("Enter MFA code:")
-
+			passed_mfa=True
 		record.send_keys(record_input)
 		awsweb.FindEl("//button[@type='submit']").click()
 		time.sleep(2)
-
-	while awsweb.driver.title == "Your applications":
-		element1 = awsweb.FindEl("//portal-application[starts-with(@id,'app-')]")
-		hoverover = ActionChains(awsweb.driver).move_to_element(element1).click().perform()
-		time.sleep(2)
+	
+	while passed_mfa:
+		awsweb.WaitElClick("//portal-application[starts-with(@id,'app-')][@title='AWS Account']")
+		#element1 = awsweb.FindEl("//portal-application[starts-with(@id,'app-')]")
+		#hoverover = ActionChains(awsweb.driver).move_to_element(element1).click().perform()
+		#time.sleep(2)
 		if awsweb.FindAccUserClick("//portal-instance","//portal-instance",args.awsaccount,"There is no such AWS account - "+args.awsaccount) is not True:
 			break
 		time.sleep(2)
@@ -170,7 +178,7 @@ def run_program():
 
 def exit_gracefully(signum, frame):
 	# restore the original signal handler as otherwise evil things will happen
-    # in raw_input when CTRL+C is pressed, and our signal handler is not re-entrant
+	# in raw_input when CTRL+C is pressed, and our signal handler is not re-entrant
 	# signal.signal(signal.SIGINT, original_sigint)
 	try:
 		awsweb
